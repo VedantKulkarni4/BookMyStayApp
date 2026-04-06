@@ -1,117 +1,98 @@
-# Book My Stay App
+## Use Case 7: Add-On Service Selection
 
-## Use Case 6: Reservation Confirmation & Room Allocation
+### Goal
 
-This use case introduces the reservation confirmation process where booking requests are processed and rooms are allocated safely. The system ensures that each confirmed reservation receives a unique room ID while maintaining inventory consistency.
-
-The booking service processes requests from the queue and performs controlled allocation by validating availability and updating inventory immediately.
+Extend the booking model to support optional services, demonstrating how real-world business features can be added without modifying core booking or allocation logic.
 
 ---
 
-## Goal
+### Actor
 
-Confirm booking requests by assigning rooms safely while ensuring inventory consistency and preventing double booking under all circumstances.
-
----
-
-## Actors
-
-Booking Service
-Processes queued booking requests and performs room allocation.
-
-Inventory Service
-Maintains and updates room availability state.
+* **Guest** – selects optional services for an existing reservation
+* **Add-On Service** – represents an individual optional offering
+* **Add-On Service Manager** – manages the association between reservations and selected services
 
 ---
 
-## Flow of Execution
+### Flow
 
-1. A booking request is removed from the request queue.
-2. The system checks availability for the requested room type.
-3. A unique room ID is generated.
-4. The room ID is recorded to prevent reuse.
-5. Inventory count is updated immediately.
-6. Reservation is confirmed.
-
----
-
-## Key Java Concepts Used
-
-### Set Data Structure
-
-A `Set<String>` is used to store allocated room IDs.
-
-```java
-Set<String> allocatedRooms = new HashSet<>();
-```
-
-Sets enforce uniqueness, preventing duplicate room assignments.
+1. Guest selects one or more add-on services
+2. Selected services are added to a list
+3. The list of services is mapped to the corresponding reservation ID
+4. Additional cost for the reservation is calculated
+5. Core booking and inventory state remain unchanged
 
 ---
 
-### HashMap Mapping
+### Key Concepts Used
 
-A `HashMap<String, Set<String>>` maps each room type to its allocated room IDs.
+* **Business Extensibility**
+  Real-world bookings often include additional offerings beyond the primary product. The system supports new features without disrupting existing logic.
 
-This allows grouped tracking of assigned rooms.
+* **One-to-Many Relationship**
+  A single reservation can have multiple associated services.
 
----
+* **Map and List Combination**
+  `Map<String, List<AddOnService>>` enables efficient lookup and flexible storage of multiple services.
 
-### FIFO Queue Processing
+* **Composition over Inheritance**
+  Services are composed with reservations instead of being inherited, allowing flexible system growth.
 
-Booking requests are processed in FIFO order using a queue.
+* **Separation of Core and Optional Features**
+  Add-on services are handled independently of booking and allocation logic.
 
-This ensures fairness and predictable processing order.
-
----
-
-### Atomic Allocation Logic
-
-Room allocation and inventory updates occur together as one logical unit, preventing partial system updates.
-
----
-
-### Inventory Synchronization
-
-Inventory is updated immediately after allocation to maintain accurate availability.
+* **Cost Aggregation**
+  Service costs are calculated separately and combined when required.
 
 ---
 
-## Key Requirements
+### Key Requirements
 
-* Retrieve booking requests from the queue in FIFO order
-* Generate a unique room ID for every confirmed reservation
-* Prevent reuse of room IDs
-* Update inventory immediately after allocation
-* Maintain consistent system state
+* Attach multiple services to a single reservation
+* Store services using a reservation-to-services mapping
+* Calculate total additional cost for selected services
+* Ensure booking and inventory logic remain unaffected
+* Allow easy addition of new service types
 
 ---
 
-## How to Compile and Run
+### Key Benefits
 
-Compile the program:
+* Flexible attachment of optional services to reservations
+* Clean separation between core booking and additional features
+* Easy extensibility for future enhancements
+
+---
+
+### Drawbacks of Previous Use Case
+
+Use Case 6 confirmed room allocation but treated bookings as static entities.
+Without add-on support, the system could not model real-world booking enhancements such as additional services.
+
+---
+
+### Sample Execution
+
+#### Compile
 
 ```
-javac UseCase6RoomAllocationService.java
+javac UseCase7AddOnServiceSelection.java
 ```
 
-Run the program:
+#### Run
 
 ```
-java UseCase6RoomAllocationService
+java UseCase7AddOnServiceSelection
 ```
 
 ---
 
-## Key Benefits
+### Sample Output
 
-* Guaranteed uniqueness of room assignments
-* Immediate synchronization between booking and inventory
-* Prevention of double booking scenarios
-* Consistent and reliable reservation processing
-
----
-
-## Drawbacks of Previous Use Case
-
-Use Case 5 introduced booking request ordering but did not confirm reservations or assign rooms. Without allocation and uniqueness enforcement, queued requests could still result in conflicting assignments.
+```
+Services for Reservation R101:
+- Breakfast : ₹500
+- Airport Pickup : ₹1200
+- Extra Bed : ₹800
+Total Add-On Cost: ₹2500
+```
